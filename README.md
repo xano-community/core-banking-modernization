@@ -11,7 +11,7 @@ Drop this module into any Xano workspace. It ships five tables and a small publi
 | Table | Purpose |
 | --- | --- |
 | `cbm_account` | One row per account, keyed by `legacy_account_no` (unique). Stored `balance`, `type`, `status` (`active`/`frozen`/`closed`). |
-| `cbm_transfer` | A transfer with a state machine: `pending` → `completed`, `pending_approval` → `approved`/`completed`, or `rejected`/`failed`. |
+| `cbm_transfer` | A transfer with a state machine: `pending` → `completed`, `pending_approval` → `completed` (on approve) or `rejected` (on reject), or `failed`. The approve/reject decision is recorded on the `cbm_approval` row. |
 | `cbm_approval` | One approval task per held transfer, with the decision, approver, and threshold. |
 | `cbm_fraud_flag` | The individual fraud rules that fired for a transfer, each with a score and detail. |
 | `cbm_ledger_entry` | Double-entry ledger: one `debit`/`credit` row per side of each settled transfer, plus opening balances. |
@@ -97,7 +97,7 @@ function.run "cbm_reconcile" {
 | --- | --- | --- |
 | `frozen_account` | source account status is `frozen` | +100 |
 | `large_amount` | `amount` > `large_txn_threshold` (default 5000) | +40 |
-| `velocity_daily_limit` | today's debits + `amount` > `daily_limit` (default 10000) | +50 |
+| `velocity_daily_limit` | debits in the last 24h + `amount` > `daily_limit` (default 10000) | +50 |
 | `new_payee` | `is_new_payee` is true | +20 |
 | `blocklist` | `recipient_blocklisted` is true | +100 |
 

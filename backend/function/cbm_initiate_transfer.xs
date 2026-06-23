@@ -54,8 +54,9 @@ function "cbm_initiate_transfer" {
         var.update $result { value = $rejected }
       }
       else {
+        var $since { value = (now - 86400000) }
         db.query "cbm_ledger_entry" {
-          where = $db.cbm_ledger_entry.account_id == $from.id && $db.cbm_ledger_entry.direction == "debit"
+          where = $db.cbm_ledger_entry.account_id == $from.id && $db.cbm_ledger_entry.direction == "debit" && $db.cbm_ledger_entry.created_at >= $since
           return = {type: "list"}
         } as $debits
         var $daily { value = (($debits|map:$$.amount)|sum) }
